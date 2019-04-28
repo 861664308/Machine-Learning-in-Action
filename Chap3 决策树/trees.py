@@ -3,10 +3,12 @@
 Created on Sat Mar  2 11:16:10 2019
 
 @author: 鲁金川
+
 """
+import numpy as np
+import operator
 #计算给定数据集的香农熵
 
-import numpy as np
 
 def calShannonEnt(dataSet): #输入参数是数据集
     numEntries = len(dataSet) #获取样本数量
@@ -74,3 +76,51 @@ def chooseBestFeatureToSplit(dataSet):
             bestInfoGain = infoGain
             bestFeature = i 
     return bestFeature
+
+#统计classList中出现最多的元素（类标签）
+def majorityCnt(classList):#输入是类标签列表
+    classCount = []
+    #统计classList中每个元素出现的次数
+    for vote in classList:
+        if vote not in classCount.keys():
+            classCount[vote] = 0
+        classCount[vote] += 1
+    #根据字典的值降序排列
+    #operator.itemgetter()获取对象第一列的值
+    sortedClassCount = sorted(classCount.iteritems(),
+                key=operator.itemgetter(1), reverse=True)
+    return sortedClassCount[0][0] #返回classList中出现次数最多的元素
+
+'''
+创建树的代码（ID3算法）
+递归有两个终止条件：1 所有类标签完全相同，直接返回类标签
+                2 用完所有的标签但是得不到唯一的分组，即特征不够用，挑选出出现数量最多的类别作为返回
+                
+'''
+def createTree(dataSet, labels):#输入训练集和标签
+    #取出训练集的标签
+    classList = [example[-1] for example in dataSet]
+    #如果类别完全相同，则停止划分
+    if classList.count(classList[0]) == len(classList):
+        return classList[0]
+    #遍历完所有特征时返回出现次数最多的标签
+    if len(dataSet) == 1:
+        return majorityCnt(classList)
+    #选取最优特征
+    bestFeat = chooseBestFeatureToSplit(dataSet)
+    #选择最优特征的标签
+    bestFeatLabel = labels[bestFeat]
+    #根据最优特征的标签生成决策树,得到一个嵌套的字典
+    myTree = {bestFeatLabel:{}}
+    #删除已经使用的标签
+    del(labels[bestFeat])
+    #得到训练集中所有的最优解的属性值
+    featValues = [example[bestFeat] for example in dataSet]
+    #去掉重复的属性
+    uniqueVals = set(featValues)
+    #遍历特征，构建决策树
+    for value in uniqueVals:
+        subLabels = labels[:] #复制类标签，在后续递归时候调用
+        myTree[bestFeatLabel][value] = createTree(splitDataSet(
+            dataSet, bestFeat, value), subLabels)
+    return myTree #返回决策树
