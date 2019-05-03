@@ -124,3 +124,26 @@ def createTree(dataSet, labels):#输入训练集和标签
         myTree[bestFeatLabel][value] = createTree(splitDataSet(
             dataSet, bestFeat, value), subLabels)
     return myTree #返回决策树
+
+#使用决策树的分类函数
+def classify(inputTree, featLabels, testVec):
+    firstStr = next(iter(inputTree))
+    secondDict = inputTree[firstStr]
+    featIndex = featLabels.index(firstStr)
+    for key in secondDict.keys():
+        if testVec[featIndex] == key:
+            if type(secondDict[key]).__name__ == 'dict':
+                classLabel = classify(secondDict[key], featLabels, testVec)
+            else:
+                classLabel = secondDict[key]
+    return classLabel
+#使用pickle模块存储决策树
+def storeTree(inputTree, filename):
+    import pickle
+    fw = open(filename, 'wb')
+    pickle.dump(inputTree, fw)
+    fw.close()
+def grabTree(filename):
+    import pickle
+    fr = open(filename, 'rb')
+    return pickle.load(fr)

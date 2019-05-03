@@ -1,6 +1,6 @@
 #使用文本注解绘制树节点
 import matplotlib.pyplot as plt
-
+from matplotlib.font_manager import FontProperties
 dicisionNode = dict(boxstyle = 'sawtooth', fc = '0.8')
 leafNode = dict(boxstyle = 'round4', fc = '0.8')
 arrow_args = dict(arrowstyle = '<-') #设置箭头格式
@@ -13,6 +13,10 @@ def plotNode(nodeTex, centerPt, parentPt, nodeType):
     :param nodeType: 箭头所在点
     :return:
     '''
+    # 定义箭头格式
+    arrow_args = dict(arrowstyle="<-")
+    # 设置中文字体
+    font = FontProperties(fname=r"C:\Windows\Fonts\simsun.ttc", size=14)
     createPlot.ax1.annotate(nodeTex, xy = parentPt, xycoords = 'axes fraction',
                 xytext = centerPt, textcoords = 'axes fraction', va = 'center',
                 ha = 'center', bbox = nodeType, arrowprops = arrow_args)
@@ -26,7 +30,7 @@ def createPlot(inTree):
     #去掉x，y轴
     createPlot.ax1 = plt.subplot(111, frameon = False, **axprops)
     # 获取叶节点个数
-    plotTree.totalW = float(getNumLeaf(inTree))
+    plotTree.totalW = float(getNumLeafs(inTree))
     # 获取层数
     plotTree.totalD = float(getTreeDepth(inTree))
     # x偏移与y偏移
@@ -36,7 +40,7 @@ def createPlot(inTree):
     plotTree(inTree, (0.5, 1.0), '')
     plt.show()
 #获取树的节点
-def getNumLeaf(myTree):
+def getNumLeafs(myTree):
     '''
     :param myTree: 决策树
     :return: 决策树叶子节点的数目
@@ -54,7 +58,7 @@ def getNumLeaf(myTree):
     for key in secondDict.keys():
         #测试该节点是否为字典，如果不是字典，代表此节点为叶子节点
         if type(secondDict[key]).__name__ == 'dict':
-            numLeafs += getNumLeaf(secondDict[key])
+            numLeafs += getNumLeafs(secondDict[key])
         else:
             numLeafs += 1
     return numLeafs
@@ -96,7 +100,7 @@ def plotMidText(cntrpt, parentpt, txtString):
 
 def plotTree(myTree, parentPt, nodeTxt):
     #获取叶节点的数目，决定树的宽度
-    numLeafs = getNumLeaf(myTree)
+    numLeafs = getNumLeafs(myTree)
     #获取决策树层数
     depth = getTreeDepth(myTree)
     #下个字典
